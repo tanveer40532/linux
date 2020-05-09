@@ -1,0 +1,57 @@
+raid 1
+-----------------------------------------------------
+#https://neklaf.com/2016/07/09/set-up-raid-1-mirroring-on-centos-7/
+#https://www.tecmint.com/create-raid1-in-linux/
+#https://www.linuxbabe.com/linux-server/linux-software-raid-1-setup
+https://www.golinuxcloud.com/configure-software-raid-1-spare-disk-linux/
+https://www.slashroot.in/software-raid-1-configuration-linux
+
+--------------------------------------------------------------------------------------
+for host in /sys/class/scsi_host/*; do echo "- - -" | sudo tee $host/scan; ls /dev/sd* ; done
+ fdisk -l | grep sd
+ ------------------------------------------------------------------------------------------------------
+yum install mdadm
+#mdadm -E /dev/sd[b-c]
+fdisk /dev/sdb
+partprobe
+mdadm -E /dev/sd[b-c]
+mdadm --create /dev/md0 --level=mirror --raid-devices=2 /dev/sd[b-c]1
+cat /proc/mdstat
+mdadm -E /dev/sd[b-c]1
+mdadm --detail /dev/md0
+pvcreate /dev/md0
+pvs
+vgcreate oracle /dev/md0
+lvcreate -l +10%FREE -n oracle_lv oracle
+mkfs.ext4 /dev/oracle/oracle_lv 
+mkdir /backup
+echo " /dev/mapper/oracle-oracle_lv /backup ext4 defaults 0 0 " >> /etc/fstab
+mount -av 
+cat /etc/fstab 
+lsblk
+mdadm /dev/md0 --fail /dev/sdb
+cat /proc/mdstat 
+cat /var/log/messages 
+cat /proc/mdstat 
+mdadm /dev/md0 --remove /dev/sdb
+cat /proc/mdstat 
+lsblk
+mdadm /dev/md0 --add /dev/sdd
+---------------------------------------------------------------------------
+# mount /dev/oracle/oracle_lv /backup/
+# df -h
+----------------------------------------------------------------------------------------------
+# ls /sys/class/scsi_host
+host0 host1 host2
+
+Then you will scan every iscsi disk found and scan after every scanning if the new disk was detected. It means
+
+# echo "- - -" > /sys/class/scsi_host/host0/scan
+# echo "- - -" > /sys/class/scsi_host/host1/scan
+# echo "- - -" > /sys/class/scsi_host/host2/scan
+
+or
+---------------------------------------------------------------------------------
+# for host in `ls /sys/class/scsi_host/`;do
+echo "- - -" >/sys/class/scsi_host/${host}/scan;
+done
