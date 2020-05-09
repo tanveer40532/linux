@@ -1,0 +1,50 @@
+#logrotate in linux
+https://www.aerospike.com/docs/operations/configure/log/logrotate.html
+https://arkit.co.in/logrotate-configuration-rhel-7/
+https://serversforhackers.com/c/managing-logs-with-logrotate
+https://www.linode.com/docs/uptime/logs/use-logrotate-to-manage-log-files/
+https://www.digitalocean.com/community/tutorials/how-to-manage-logfiles-with-logrotate-on-ubuntu-16-04
+#https://www.tecmint.com/install-logrotate-to-manage-log-rotation-in-linux/
+###https://www.linuxhelp.com/how-to-setup-and-manage-logrotate-in-centos7-6 
+--------------------------------------------------------------------
+[root@linuxhelp ~]# cd /etc/logrotate.d/
+ [root@linuxhelp logrotate.d]# ls -la
+[root@linuxhelp logrotate.d]# vim apache
+---------------------------------------------------
+/var/log/httpd/* {
+weekly
+create 0644 root root
+rotate 5
+size 100M
+dateext
+dateformat -%d%m%y
+compress
+olddir /mnt/test/
+notifempty
+}
+-------------------------------------
+ [root@linuxhelp logrotate.d]# vim /var/log/httpd/access_log 
+
+[root@linuxhelp logrotate.d]# vim /var/log/httpd/error_log
+----------------------------------------------------------------
+Change directory
+
+[root@linuxhelp logrotate.d]# cd /mnt
+
+create Directory
+
+[root@linuxhelp mnt]# mkdir test
+[root@linuxhelp mnt]# logrotate -f /etc/logrotate.d/apache 
+
+Then change directory to test
+
+[root@linuxhelp mnt]# cd test
+[root@linuxhelp test]# ls -la
+[root@linuxhelp test]# gunzip access_log.1.gz 
+ [root@linuxhelp test]# gunzip error_log.1.gz 
+
+Check the rotated log file and original log file
+
+[root@linuxhelp test]# vim access_log.1 
+[root@linuxhelp test]# vim /var/log/httpd/access_log 
+---------------------------------------------------------------------------- 
